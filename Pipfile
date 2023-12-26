@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tensorflow-addons = "*"
+numpy = "*"
+pandas = "*"
+matplotlib = "*"
+statsmodels = "*"
+cartopy = "*"
+tensorflow = "==2.13.0"
+python-pptx = "*"
+
+[dev-packages]
+pyyaml = "*"
+spyder = "*"
+
+[requires]
+python_version = "3.10"

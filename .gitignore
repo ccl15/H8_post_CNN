@@ -1,0 +1,14 @@
+logs/
+saved_models/
+*.txt
+
+.ipynb_checkpoints
+__pycache__
+
+*.npy
+*.npz
+*.jpg
+*.png
+*.h5
+*.tfr
+*.pptx
