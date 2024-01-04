@@ -34,9 +34,8 @@ def read_data(time_str):
         for j in range(8,567):
             H8 = H8_data[i-dn:i+dn, j-dn:j+dn]
             csr = csr_data[i-dn:i+dn, j-dn:j+dn]
-            images.append( np.stack([csr, H8], axis=-1) )
-            #images.append( H8 )
-            
+            dcsr = csr - H8
+            images.append( np.stack([H8, dcsr], axis=-1) )
             lat_norm = 1-i/525.0
             lon_norm = j/575.0
             attrs.append( np.array([np.sin(jday), np.cos(jday), hr, lon_norm, lat_norm]).astype(np.float32) )
@@ -44,22 +43,27 @@ def read_data(time_str):
 
 
 if __name__ == '__main__':
+    exp = 'C12_dcsr' # saved name
+    # model 
     model_settings = {'name':'models.CNN_1_2', 
-                    'weight':'saved_models/CSR/C12_64_4_3_p2', 
+                    'weight':'saved_models/CSR/C12_dcsr_d8_p6', 
                     'parameters':{
                         'filters': 64,
                         'levels': 4,
                         'FC_units': [128, 32,8],
                     }}
     model = create_model(model_settings)
-    for date in ['20200620', '20201220']:
+
+    # do predict
+    pred_dict = {}
+    dates = [f'2020{yr:02d}20' for yr in range(3,13,3)]
+    for date in dates:
         for hr in ['12','17']:
             time_str = date + hr
-            print(time_str)
             images, attrs = read_data(time_str)
             predicts = []
             for i in range(509):
                 pred = model(images[559*i:559*(i+1)], attrs[559*i:559*(i+1)])
                 predicts.append(pred)
-
-            np.save(f'../output/grid_ssi/{time_str}.npy', predicts)
+            pred_dict[time_str] = np.array(np.squeeze(predicts))
+    np.save(f'../output/grid_data/{exp}.npy', pred_dict)

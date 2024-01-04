@@ -33,8 +33,8 @@ def get_TFRecord_dataset(data_yr, shuffle_buffer, batch_size):
         
         H8 = tf.reshape(tf.io.decode_raw(features['H8'], tf.float32), [8,8,1])
         csr = tf.reshape(tf.io.decode_raw(features['csr'], tf.float32), [8,8,1])
-        dssi = tf.subtract(csr, H8)
-        images = tf.concat([H8, dssi], axis=2)
+        dcsr = tf.subtract(csr, H8)
+        images = tf.concat([H8, dcsr], axis=2)
         attr = tf.io.decode_raw(features['attr'], tf.float32)
         return images, attr, features['ssi']
     

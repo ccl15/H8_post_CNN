@@ -18,11 +18,11 @@ def get_test_TFRecord(data_list, batch_size=10000):
             'attr'  : tf.io.FixedLenFeature([], tf.string),
         }
         features = tf.io.parse_single_example(example_string, features_description)
-        
+
         H8  = tf.reshape(tf.io.decode_raw(features['H8'], tf.float32), [8,8,1])
         csr = tf.reshape(tf.io.decode_raw(features['csr'], tf.float32),  [8,8,1])
-        images = tf.concat([csr, H8], axis=2)
-        #images = tf.image.central_crop(H8, 0.5)
+        dcsr = tf.subtract(csr, H8)
+        images = tf.concat([H8, dcsr], axis=2)
         attr = tf.io.decode_raw(features['attr'], tf.float32)
         return images, attr 
 

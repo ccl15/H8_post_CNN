@@ -30,9 +30,10 @@ class SSI_Ploter():
     def _load_h8(self, tstr):
         H8_file = f'/NAS-Kumay/H8/{tstr[:4]}/insotwf1h_{tstr}'
         self.h8data = np.fromfile(H8_file, dtype=np.float32).reshape(525, 575)
+
     def _load_cnn(self, tstr):
         cnn_data = np.full((525, 575), np.nan)
-        cnn_data[8:517, 8:567] = np.squeeze(np.load(f'grid_ssi/{tstr}.npy'))
+        cnn_data[8:517, 8:567] = data[tstr]
         self.cnn_data = cnn_data
 
     def plot_ssi(self, data, fig_name):
@@ -53,6 +54,7 @@ class SSI_Ploter():
         plt.xticks(np.arange(118, 124, 1))
         plt.yticks(np.arange(22, 27, 1))
         plt.savefig(f'grid_fig/{fig_name}.png', dpi=200, bbox_inches='tight')
+        plt.close()
 
     def plot_diff(self, tstr):
         data = self.cnn_data - self.h8data
@@ -61,24 +63,25 @@ class SSI_Ploter():
         ax.set_extent([self.lon_min, self.lon_max, self.lat_min, self.lat_max], crs=self.proj)
         plt.contourf(self.xx, self.yy, data,
                      cmap='bwr',
-                     levels= np.arange(-3, 3.1, 0.2),
+                     levels= np.arange(-1.5, 1.6, 0.1),
                      extend='both')
-        plt.colorbar(ticks=np.arange(-3, 3.1, 1), shrink=0.6)
+        plt.colorbar(ticks=np.arange(-1.5, 1.6, 0.5), shrink=0.6)
 
         ax.add_feature(self.tw_coastline, linewidth=0.2)
         ax.add_feature(self.tw_countyline, linewidth=0.2)
         plt.gca().set_aspect('equal', adjustable='box')
         plt.xticks(np.arange(118, 124, 1))
         plt.yticks(np.arange(22, 27, 1))
-        plt.savefig(f'grid_fig/{tstr}d.png', dpi=200, bbox_inches='tight')
-
+        plt.savefig(f'grid_fig/{exp}/{tstr}d.png', dpi=200, bbox_inches='tight')
+        plt.close()
 
 ssi_ploter = SSI_Ploter()
-for date in ['20200620', '20201220']:
-    for hr in ['12','17']: 
-        tstr = date + hr
+
+for exp in ['C12_csr','C12_dcsr']:
+    data = np.load(f'grid_data/{exp}.npy', allow_pickle=True).item()
+    for tstr in data:
         ssi_ploter._load_cnn(tstr)
         ssi_ploter._load_h8(tstr)
-        ssi_ploter.plot_ssi(ssi_ploter.cnn_data, f'{tstr}c')
-        #ssi_ploter.plot_ssi(ssi_ploter.h8data, f'{tstr}h')
+        ssi_ploter.plot_ssi(ssi_ploter.cnn_data, f'{exp}/{tstr}')
+        ssi_ploter.plot_ssi(ssi_ploter.h8data, f'H8/{tstr}')
         ssi_ploter.plot_diff(tstr)
