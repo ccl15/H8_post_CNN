@@ -21,10 +21,25 @@ def MAE(yp,yt):
 def Bias(yp,yt):
     return np.mean(yp-yt)
 
-def exp_scatter(sub_exp):
-    for yr in [2022,2023]:
-        label = np.load(f'label/label_{yr}.npy')
-        pred = np.load(f'{exp}/{sub_exp}{yr}.npy') # load predict 
+
+class Scatter():
+
+    def load_h8(self):
+        self.label = np.load(f'label/label_{yr}.npy')
+        self.pred = np.load(f'label/input{yr}.npy')[:,4,4,1]
+
+    def load_alltime(self, sub_exp):
+        self.label = np.load(f'label/label_{yr}.npy')
+        self.pred = np.load(f'{exp}/{sub_exp}{yr}.npy')
+
+    def load_hr(self, sub_exp, hr):
+        self.label = np.load(f'label/label_HR{hr}_2022.npy')
+        self.pred = np.load(f'{exp}/{sub_exp}.npy')
+
+    def plot_scatter(self):
+        label = self.label
+        pred = self.pred
+
         # calculate
         rmse = RMSE(pred,label)
         mae = MAE(pred,label)

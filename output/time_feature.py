@@ -8,10 +8,12 @@ plt.rcParams.update({'font.size': 10})
 
 # data loading
 yr = 2022
-sub_exp = 'CSR/C12_dcsr_d8_p'
-pred = np.load(f'{sub_exp}{yr}.npy') # load predict 
+#sub_exp = 'CSR/C12_dcsr_d8_p'
+#pred = np.load(f'{sub_exp}{yr}.npy') # load predict 
+pred = np.load(f'label/input{yr}.npy')[:,4,4,1] # H8-SSI
 label = np.load(f'label/label_{yr}.npy') # load test data
 
+# load infomations
 ds = np.load('label/date_hr_2022.npy')
 dates = ds[0,:]
 times = ds[1,:]

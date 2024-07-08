@@ -35,6 +35,9 @@ class SSI_Ploter():
         cnn_data = np.full((525, 575), np.nan)
         cnn_data[8:517, 8:567] = data[tstr]
         self.cnn_data = cnn_data
+    
+    def _load_cnn2(self, tstr):
+        self.cnn_data = np.load(f'../operate/grid/{tstr}.npy')
 
     def plot_ssi(self, data, fig_name):
         vmax = 4.5
@@ -77,11 +80,14 @@ class SSI_Ploter():
 
 ssi_ploter = SSI_Ploter()
 
-for exp in ['C12_csr','C12_dcsr']:
-    data = np.load(f'grid_data/{exp}.npy', allow_pickle=True).item()
-    for tstr in data:
-        ssi_ploter._load_cnn(tstr)
-        ssi_ploter._load_h8(tstr)
-        ssi_ploter.plot_ssi(ssi_ploter.cnn_data, f'{exp}/{tstr}')
-        ssi_ploter.plot_ssi(ssi_ploter.h8data, f'H8/{tstr}')
-        ssi_ploter.plot_diff(tstr)
+#for exp in ['C12_csr','C12_dcsr']:
+#    data = np.load(f'grid_data/{exp}.npy', allow_pickle=True).item()
+#    for tstr in data:
+day = '20240101'
+ssi_ploter._load_cnn2(day)
+for hr in range(6, 19, 3):
+    tstr = f'{day}{hr:02d}'
+    ssi_ploter._load_h8(tstr)
+    ssi_ploter.plot_ssi(ssi_ploter.cnn_data[hr-6,...], f'C12_dcsr/{tstr}')#f'{exp}/{tstr}')
+    ssi_ploter.plot_ssi(ssi_ploter.h8data, f'H8/{tstr}')
+    #ssi_ploter.plot_diff(tstr)

@@ -1,10 +1,12 @@
 logs/
 saved_models/
-*.txt
+
 
 .ipynb_checkpoints
 __pycache__
 
+# data
+*.txt
 *.npy
 *.npz
 *.jpg
@@ -12,3 +14,4 @@ __pycache__
 *.h5
 *.tfr
 *.pptx
+*.csv

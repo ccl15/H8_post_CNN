@@ -47,26 +47,16 @@ def read_data(time_str):
             lon_norm = j/575.0
             attrs[i-dn,j-dn,3:] = [lon_norm, lat_norm]
     return images, attrs
-#%%
 
-if __name__ == '__main__':
-    # date settings
-    parser = argparse.ArgumentParser()
-    parser.add_argument('day', type=str, help='%Y%m%d')
-    args = parser.parse_args()
 
-    # load model
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
-    model = create_model()
-
+def predict_daily(day):
     # predict
     day_ssi = []
     predict_flag = False
     for hr in range(6, 20):
         hr_ssi = np.zeros((525, 575))
         hr_ssi.fill(np.nan)
-        images, attrs = read_data(f'{args.day}{hr:02d}')
+        images, attrs = read_data(f'{day}{hr:02d}')
 
         if images is not None:
             predict_flag = True
@@ -76,9 +66,27 @@ if __name__ == '__main__':
         day_ssi.append(hr_ssi)
 
     # output
-    outdir = Path(f'grid/{args.day[:6]}')
+    outdir = Path(f'CNN_SSI/{args.day[:6]}')
     outdir.mkdir(parents=True, exist_ok=True)
     if predict_flag:
-        np.save(f'{outdir}/{args.day}.npy', day_ssi)
-        print(f'Save {args.day} done.')
+        np.save(f'{outdir}/{day}.npy', day_ssi)
+        print(f'Save {day} done.')
     
+
+#%%
+
+if __name__ == '__main__':
+    # date settings
+    parser = argparse.ArgumentParser()
+    parser.add_argument('day', type=str, help='%Y%m%d')
+    #parser.add_argument('--end', type=str, default=None)
+    parser.add_argument('-g', type=str, default='1', help='GPU numbers used.')
+    args = parser.parse_args()
+
+    # load model
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.g
+    model = create_model()
+
+    # predict
+    predict_daily(args.day)
