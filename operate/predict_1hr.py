@@ -85,7 +85,7 @@ def predict_daily(day):
     outdir = Path(f'CNN_SSI/{args.day[:6]}')
     outdir.mkdir(parents=True, exist_ok=True)
     if predict_flag:
-        np.save(f'{outdir}/{day}_v2.npy', day_ssi)
+        np.save(f'{outdir}/{day}.npy', day_ssi)
         print(f'Save {day} done.')
     
 
