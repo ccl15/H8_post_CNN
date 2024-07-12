@@ -23,7 +23,6 @@ def Bias(yp,yt):
 
 
 class Scatter():
-
     def load_h8(self):
         self.label = np.load(f'label/label_{yr}.npy')
         self.pred = np.load(f'label/input{yr}.npy')[:,4,4,1]
@@ -73,10 +72,17 @@ class Scatter():
         # 
         plt.xlabel('Station SSI (MJ.m^-2)')
         plt.ylabel('CNN SSI (MJ.m^-2)')
-        plt.savefig(f'sta_fig/{exp}_{sub_exp}{yr}.png', dpi=200, bbox_inches='tight')
+        plt.title(yr)
+        plt.savefig(f'{exp}/ana_{sub_exp}_{yr}.png', dpi=200, bbox_inches='tight')
+        plt.close()
 
 
 #%%
-exp = 'CSR'
-for sub_exp in ['C12_64_4_3_p2']:
-    exp_scatter(sub_exp)
+if __name__ == '__main__':
+    exp = 'QC_H8attr'
+    yr = '2022'
+    scatterer = Scatter()
+
+    for sub_exp in ['C12_64_4_3', 'C11_64_4_3_1em3']:
+        scatterer.load_alltime(sub_exp)
+        scatterer.plot_scatter()

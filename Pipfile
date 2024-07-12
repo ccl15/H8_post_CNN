@@ -12,6 +12,7 @@ statsmodels = "*"
 cartopy = "*"
 tensorflow = "==2.13.0"
 python-pptx = "*"
+pyyaml = "*"
 
 [dev-packages]
 pyyaml = "*"

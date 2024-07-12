@@ -8,7 +8,7 @@ from datetime import datetime
 
 def create_model():
     model = importlib.import_module('model.CNN_1_2').Model()
-    model.load_weights('model/M').expect_partial()
+    model.load_weights('model/M1').expect_partial()
     return model
 
 class AttrLoader():
@@ -28,7 +28,7 @@ class AttrLoader():
         self.attrs[:,:,0:2] = [np.sin(jday), np.cos(jday)]
     
     def get_update_attr(self, hh, mm):
-        hr = (hh*60 + mm)/24.0/60.0
+        hr = (hh*60 + mm + 30)/24.0/60.0 #!!!
         self.attrs[:,:,2] = hr
         return self.attrs
 
@@ -48,20 +48,12 @@ def load_image(date, hh, mm):
         print(f'H8 data does not exist: {H8_file}')
         return None
     
-    csr_file = f'/NAS-Kumay/H8/clearsky_10MIN/2019{date[4:6]}/insocldwatt_2019{date[4:]}_{hh:02d}{mm:02d}'
-    if not Path(csr_file).exists():
-        print(f'CSR data does not exist: {csr_file}')
-        return None
+    H8 = np.fromfile(H8_file, dtype=np.float32).reshape(525, 575).astype(np.float32) * 0.0036
+ 
+    H8_windows = sliding_window_view(H8, (dn * 2, dn * 2))
     
-    H8_data = np.fromfile(H8_file, dtype=np.float32).reshape(525, 575).astype(np.float32)
-    csr_data = np.fromfile(csr_file, dtype=np.float32).reshape(525, 575).astype(np.float32)
-
-    H8_windows = sliding_window_view(H8_data, (dn * 2, dn * 2))
-    csr_windows = sliding_window_view(csr_data, (dn * 2, dn * 2))
-    dcsr_windows = csr_windows - H8_windows
-
-    images = np.stack([H8_windows, dcsr_windows], axis=-1)
-    return images * 6
+    images = H8_windows[..., np.newaxis]
+    return images
 
 
 def predict_1hour(date, hh):
@@ -69,7 +61,10 @@ def predict_1hour(date, hh):
     SSI_hr = []
     predict_flag = False
 
-    for mm in range(0, 60, 10):
+    for mm in range(10, 61, 10):
+        if mm == 60:
+            hh += 1
+            mm = 0
         # load image and attr
         images = load_image(date, hh, mm)
         attrs = attr_loader.get_update_attr(hh, mm)
@@ -81,10 +76,10 @@ def predict_1hour(date, hh):
             for i in range(518):
                 pred = np.squeeze(model(images[i], attrs[i]))
                 ssi[i+4, 4:-3] = pred
-        SSI_hr.append(ssi / 6)
+        SSI_hr.append(ssi / 0.0036)
 
     # output
-    outdir = Path(f'CNN_SSI_10MIN/{date}')
+    outdir = Path(f'../verify/CNN_SSI_10MIN/{date}')
     outdir.mkdir(parents=True, exist_ok=True)
     if predict_flag:
         np.save(f'{outdir}/{date}_{hh:02d}.npy', SSI_hr)
@@ -97,7 +92,7 @@ if __name__ == '__main__':
     # date settings
     parser = argparse.ArgumentParser()
     parser.add_argument('day', type=str, help='%Y%m%d')
-    parser.add_argument('hr', type=int, help='hour')
+    #parser.add_argument('hr', type=int, help='hour')
     parser.add_argument('-g', type=str, default='1', help='GPU numbers used.')
     args = parser.parse_args()
 
@@ -111,4 +106,5 @@ if __name__ == '__main__':
     attr_loader.update_day(args.day)
 
     # predict
-    predict_1hour(args.day, args.hr)
+    for hr in range(5,19):
+        predict_1hour(args.day, hr)
