@@ -38,7 +38,7 @@ def get_TFRecord_dataset(data_yr, shuffle_buffer, batch_size):
         attr = tf.io.decode_raw(features['attr'], tf.float32)
         return images, attr, features['ssi']
     
-    data_file = [f'../data/2TFR/H8csr_s8_{yr}.tfr' for yr in range(data_yr[0], data_yr[1]+1)] #!!!
+    data_file = [f'../data/2TFR_v3/H8csr_s8_{yr}.tfr' for yr in range(data_yr[0], data_yr[1]+1)] #!!!
     dataset = tf.data.TFRecordDataset(data_file).map(_parse_example)
     
     # split to train/valid

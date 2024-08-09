@@ -21,14 +21,14 @@ def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 
-fin = [f'2TFR/H8csr_s8_{yr}.tfr' for yr in range(2022,2024)]
+fin = [f'2TFR/H8csr_s8_{yr}.tfr' for yr in range(2022,2023)]
 dataset = tf.data.TFRecordDataset(fin).map(parse_tfrecord)
 for hr in [12,17]:
     # Filter records where 'time'
     filtered_dataset = dataset.filter(lambda x: tf.strings.substr(x['time'], -2, 2) == str(hr))
 
     # Save the filtered dataset to a new TFRecord file
-    fout = f'3hrTFR/y2223_h{hr}.tfr'
+    fout = f'3hrTFR/y2022_h{hr}.tfr'
     with tf.io.TFRecordWriter(fout) as writer:
         for record in filtered_dataset:
             feature = {
@@ -40,26 +40,4 @@ for hr in [12,17]:
             }
             example = tf.train.Example(features=tf.train.Features(feature=feature))
             writer.write(example.SerializeToString())
-           
-#%% check value
-'''
-dataset = tf.data.TFRecordDataset('2TFR/H8csr_s8_2016.tfr').map(parse_tfrecord)
-features = dataset.filter(lambda x: x['time'] == '2016071012')
-
-for feature in features:
-    H8a  = tf.reshape(tf.io.decode_raw(feature['H8'], tf.float32), [8,8])
-    ssia = feature['ssi']
-    break
-
-
-dataset = tf.data.TFRecordDataset('3hrTFR/y1621_h12.tfr').map(parse_tfrecord)
-features = dataset.filter(lambda x: x['time'] == '2016071012')
-
-for feature in features:
-    H8b  = tf.reshape(tf.io.decode_raw(feature['H8'], tf.float32), [8,8])
-    ssib = feature['ssi']
-    break
-
-print(H8a-H8b)
-print(ssia-ssib)
-'''
+            

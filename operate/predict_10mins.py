@@ -56,34 +56,35 @@ def load_image(date, hh, mm):
     return images
 
 
-def predict_1hour(date, hh):
+def predict_day(date):
     # predict
     SSI_hr = []
     predict_flag = False
 
-    for mm in range(10, 61, 10):
-        if mm == 60:
-            hh += 1
-            mm = 0
-        # load image and attr
-        images = load_image(date, hh, mm)
-        attrs = attr_loader.get_update_attr(hh, mm)
+    for hh in range(5,19):
+        for mm in range(10, 61, 10):
+            if mm == 60:
+                hh += 1
+                mm = 0
 
-        ssi = np.full((525, 575), np.nan)
+            # load image and attr
+            images = load_image(date, hh, mm)
+            attrs = attr_loader.get_update_attr(hh, mm)
 
-        if images is not None:
-            predict_flag = True
-            for i in range(518):
-                pred = np.squeeze(model(images[i], attrs[i]))
-                ssi[i+4, 4:-3] = pred
-        SSI_hr.append(ssi / 0.0036)
+            ssi = np.full((525, 575), np.nan)
+            if images is not None:
+                predict_flag = True
+                for i in range(518):
+                    pred = np.squeeze(model(images[i], attrs[i]))
+                    ssi[i+4, 4:-3] = pred
+            SSI_hr.append(ssi / 0.0036)
 
     # output
-    outdir = Path(f'../verify/CNN_SSI_10MIN/{date}')
+    outdir = Path(f'../verify/CNN_SSI_10MIN/')
     outdir.mkdir(parents=True, exist_ok=True)
     if predict_flag:
-        np.save(f'{outdir}/{date}_{hh:02d}.npy', SSI_hr)
-        print(f'Save {date} {hh} done.')
+        np.save(f'{outdir}/{date}.npy', SSI_hr)
+        print(f'Save {date} done.')
     
 
 #%%
@@ -106,5 +107,4 @@ if __name__ == '__main__':
     attr_loader.update_day(args.day)
 
     # predict
-    for hr in range(5,19):
-        predict_1hour(args.day, hr)
+    predict_day(args.day)

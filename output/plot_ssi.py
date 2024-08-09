@@ -36,8 +36,8 @@ class SSI_Ploter():
         cnn_data[8:517, 8:567] = data[tstr]
         self.cnn_data = cnn_data
     
-    def _load_cnn2(self, tstr):
-        self.cnn_data = np.load(f'../operate/grid/{tstr}.npy')
+    def _load_cnn2(self, file):
+        self.cnn_data = np.load(file)
 
     def plot_ssi(self, data, fig_name):
         vmax = 4.5
@@ -83,8 +83,10 @@ ssi_ploter = SSI_Ploter()
 #for exp in ['C12_csr','C12_dcsr']:
 #    data = np.load(f'grid_data/{exp}.npy', allow_pickle=True).item()
 #    for tstr in data:
-day = '20240101'
-ssi_ploter._load_cnn2(day)
+day = '20240105'
+ssi_ploter._load_cnn2('../operate/CNN_SSI/202401/20240105_v2.npy')
+
+
 for hr in range(6, 19, 3):
     tstr = f'{day}{hr:02d}'
     ssi_ploter._load_h8(tstr)

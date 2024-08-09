@@ -24,7 +24,7 @@ def get_test_TFRecord(data_list, batch_size=10000):
         dcsr = tf.subtract(csr, H8)
         images = tf.concat([H8, dcsr], axis=2)
         attr = tf.io.decode_raw(features['attr'], tf.float32)
-        return images, attr 
+        return images, attr
 
     dataset = tf.data.TFRecordDataset(data_list).map(_parse_example)
     return dataset.batch(batch_size)
@@ -40,17 +40,17 @@ def main(exp_path, sub_exp_list):
         model = create_model_by_exp_settings(sub_exp_settings['model'], sub_exp_settings['model_setting'], model_save_path)
         print('Start predict sub-exp:', sub_exp_name)
         
-        for yr in [2022,2023]:
-            dataset = get_test_TFRecord(f'../data/2TFR/H8csr_s8_{yr}.tfr')
+        for yr in [2022, 2023]:
+            dataset = get_test_TFRecord(f'../data/2TFR_v3/H8csr_s8_{yr}.tfr')
             # output 
             predicts = []
             for image, attr in dataset:
                 pred =  np.squeeze(model(image, attr))
                 predicts.extend(pred)
-
             save_folder = f'../output/{exp_name}'
             Path(save_folder).mkdir(parents=True, exist_ok=True)
             np.save(f'{save_folder}/{sub_exp_name}{yr}.npy', predicts)
+            print(yr, len(predicts))
     print('All prediction done')
 
 

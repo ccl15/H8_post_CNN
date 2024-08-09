@@ -41,29 +41,35 @@ def combine_H8_SSi_to_TFRecord(dfs):
         return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
     dn = 4
-
-    for yr in range(2016,2024):
+    for yr in range(2022,2024):
         # get the set of df time start with yr 
         times = dfs[dfs['time'].dt.year == yr]['time'].unique()
-        tfname = f'2TFR/H8csr_s8_{yr}.tfr'
+        tfname = f'2TFR_v3/H8csr_s8_{yr}.tfr'
+        daysInYear = 366 if yr%4==0 else 365
         n=0
+        
         with tf.io.TFRecordWriter(tfname) as writer:    
             for t1 in times:
-                tstr = t1.strftime('%Y%m%d%H')
-                jday = int(datetime.strftime(t1, '%j'))/365*2*np.pi
+                tstr1 = t1.strftime('%Y%m%d%H')
+                tstr2 = t1.strftime('%m%d_%H')
+                jday = int(datetime.strftime(t1, '%j'))/daysInYear*2*np.pi
                 hr = t1.hour/24.0
 
-                H8_file = f'{H8_dir}/{t1.year}/insotwf1h_{tstr}'
-                csr_file = f'{csr_path}/2019{t1.month:02d}/insocld1h_2019{tstr[4:]}'
+                #H8_file = f'{H8_dir}/{tstr[:6]}/insotwf1h_{tstr}.dat'
+                H8_file = f'{H8_dir}/{yr}/insotwf1h_{tstr1}'
+                csr_file = f'{csr_path}/{t1.month:02d}/ClearSky_inso1hr_{tstr2}'
                 if not (Path(H8_file).exists() and Path(csr_file).exists()):
+                    print(f'{tstr1} not exist')
                     continue
+                
                 H8_data = np.fromfile(H8_file, dtype=np.float32).reshape(525, 575)
                 csr_data = np.fromfile(csr_file, dtype=np.float32).reshape(525, 575)
-
+            
                 # get data 
                 cases_intime = dfs[dfs.time == t1]
                 for _, row in cases_intime.iterrows():
-                    slon, slat, high = sid_llh[row.sid]
+                    
+                    slon, slat, _ = sid_llh[row.sid]
                     ilon, ilat = _obs_loc_index( slon, slat )
                     
                     H8_sta = H8_data[ilat-dn:ilat+dn, ilon-dn:ilon+dn].astype(np.float32)

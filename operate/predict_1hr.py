@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 def create_model():
-    model = importlib.import_module('model.CNN_1_2').Model()
+    model = importlib.import_module('model.CNN_1_3').Model()
     model.load_weights('model/M').expect_partial()
     return model
 

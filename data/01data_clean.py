@@ -14,7 +14,7 @@ def _obs_loc_index(lon, lat):
 
 def clean_and_paired(sid, ilon, ilat):
     sta_ds = []
-    for yr in range(2015, 2024):
+    for yr in range(2016, 2021):
         with open(f'{sta_dir}/{yr}/{sid}.txt', 'r') as f:
             next(f)
             for L in f:
@@ -23,8 +23,8 @@ def clean_and_paired(sid, ilon, ilat):
                 ssi = float(p[1])
                 if hr>=6 and hr<=19 and ssi>=0:
                     # convert 2015-11-01 to tstr
-                    tstr = f'{p[0][:4]}{p[0][5:7]}{p[0][8:10]}{hr:02d}'
-                    H8_file = f'{H8_dir}/{yr}/insotwf1h_{tstr}'
+                    tstr = f'{p[0][:4]}{p[0][5:7]}{p[0][8:10]}_{hr:02d}.dat'
+                    H8_file = f'{H8_dir}/{yr}{p[0][5:7]}/insotwf1h_{tstr}'
                     if not Path(H8_file).exists():
                         continue
                     H8_data = np.fromfile(H8_file, dtype=np.float32).reshape(525, 575)
@@ -33,7 +33,7 @@ def clean_and_paired(sid, ilon, ilat):
                 else:
                     continue
     sta_ds = np.array(sta_ds)
-    np.save(f'1obs_h8/{sid}.npy', sta_ds)
+    np.save(f'1obs_h8_QC1620/{sid}.npy', sta_ds)
     print(sid, len(sta_ds))
     return sta_ds
 
@@ -101,20 +101,22 @@ out_time = {
 }
 
 sta_dir = '/NAS-DS1515P/users1/T1/API/Data/AllStn/hour/GlobalSolarRadiation_Accumulation'
-H8_dir = '/NAS-Kumay/H8'
+H8_dir = '/NAS-Kumay/H8/ver202201_MODIS/inso1h'
 
 d2 = np.loadtxt('Stn_46_agr.txt', dtype=str)
 for i in range(1, d2.shape[0]):
-    if d2[i,0] in out_staion:
+    sid = d2[i,0]
+    if sid in out_staion:
         continue
-    '''
+    
     lon = float(d2[i,1])
     lat = float(d2[i,2])
     ilon, ilat = _obs_loc_index(lon, lat)
     sta_ds = clean_and_paired(sid, ilon, ilat)
-    '''
-    
+
+    #%%
     sid = d2[i,0]
+    '''
     sta_ds = np.load(f'1obs_h8/{sid}.npy')
     if sid in out_time:
         sta_out_time =  out_time[sid]
@@ -128,10 +130,9 @@ for i in range(1, d2.shape[0]):
     mask = (mask_t & mask_0 & mask_e)
     
     #plot_paired(tlist[mask], obsssi[mask],h8ssi[mask])
-    diff_HM(tlist[mask], obsssi[mask]-h8ssi[mask])
-    
-    print(sid, sum(mask) )
-    np.save(f'1obs_h8_QC/{sid}.npy', sta_ds[mask,:])
-    
+    #diff_HM(tlist[mask], obsssi[mask]-h8ssi[mask])
+    #print(sid, sum(mask) )
+    #np.save(f'1obs_h8_QC_1620/{sid}.npy', sta_ds[mask,:])
+    '''
 
 

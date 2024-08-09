@@ -23,17 +23,14 @@ def Bias(yp,yt):
 
 
 class Scatter():
+    def load_label(self):
+        self.label = np.load(f'label/label_v3_{yr}.npy')
+
     def load_h8(self):
-        self.label = np.load(f'label/label_{yr}.npy')
         self.pred = np.load(f'label/input{yr}.npy')[:,4,4,1]
 
     def load_alltime(self, sub_exp):
-        self.label = np.load(f'label/label_{yr}.npy')
         self.pred = np.load(f'{exp}/{sub_exp}{yr}.npy')
-
-    def load_hr(self, sub_exp, hr):
-        self.label = np.load(f'label/label_HR{hr}_2022.npy')
-        self.pred = np.load(f'{exp}/{sub_exp}.npy')
 
     def plot_scatter(self):
         label = self.label
@@ -79,10 +76,11 @@ class Scatter():
 
 #%%
 if __name__ == '__main__':
-    exp = 'QC_H8attr'
-    yr = '2022'
+    exp = 'CSR'
     scatterer = Scatter()
-
-    for sub_exp in ['C12_64_4_3', 'C11_64_4_3_1em3']:
-        scatterer.load_alltime(sub_exp)
-        scatterer.plot_scatter()
+    
+    for yr in [2022,2023]:
+        scatterer.load_label()
+        for sub_exp in ['V3_C13dcsr_p8']:
+            scatterer.load_alltime(sub_exp)
+            scatterer.plot_scatter()
